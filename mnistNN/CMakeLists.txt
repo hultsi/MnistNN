@@ -19,5 +19,6 @@ add_library(${PROJECT_NAME} SHARED
     src/train_v1.cpp
 )
 
+# TODO: change to PRIVATE and create public interface ?
 # include headers
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/headers)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/headers)

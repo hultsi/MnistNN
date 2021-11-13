@@ -14,10 +14,3 @@ project(RandomNN CXX)
 # Bundle together
 add_subdirectory(mnistNN)
 add_subdirectory(app)
-
-# Move data to build
-add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E cp
-    ${CMAKE_SOURCE_DIR}/data/ $<TARGET_FILE_DIR:MyTarget>
-)
