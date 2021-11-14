@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 project(MnistNN VERSION 0.0.1 DESCRIPTION "Random MnistNN library")
 
 # Bundle library
-add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME} STATIC
     src/mnistParser.cpp
     src/statpack.cpp
     src/train_v1.cpp

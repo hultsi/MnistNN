@@ -1,20 +1,21 @@
+#include <iostream>
 #include <array>
 #include "mnistNN.h"
 #include "statpack.h"
+#include "mnistParser.h"
 
 // TODO: Change all std::array<std::array<...>> to one dimensionals...
 namespace mnistNN {
-
     void train_v1() {
-        constexpr const int learnRate = 5;
+        int learnRate = 5;
 
         // HiddenLayer size
         constexpr const int hLayerN1 = 40;
         constexpr const int hLayerN2 = 20;
 
-        std::array<std::array<int, 784>, hLayerN1> weights1; //28^2
-        std::array<std::array<int, hLayerN1>, hLayerN2> weights2;
-        std::array<std::array<int, hLayerN2>, 10> weights3;
+        std::array<std::array<float, 784>, hLayerN1> weights1; //28^2
+        std::array<std::array<float, hLayerN1>, hLayerN2> weights2;
+        std::array<std::array<float, hLayerN2>, 10> weights3;
 
         // Randomize initial weights
         for (int k = 0; k < hLayerN1; k++) {
@@ -31,7 +32,7 @@ namespace mnistNN {
             }
         }
 
-        std::array<float, 10> result;
+        std::array<int, 10> result;
         std::array<int, 10> targetResult;
         std::array<float, hLayerN1> wSum1;
         std::array<float, hLayerN2> wSum2;
@@ -58,6 +59,7 @@ namespace mnistNN {
         float backPropTerm = 0;
         int loopCounter = 0;
         int targetNumber = 0;
+        int epochLength = 10;
 
         // Randomize biases
         for (int i = 0; i < hLayerN1; i++) {
@@ -74,7 +76,10 @@ namespace mnistNN {
         // DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
         // Date dateobj = new Date();
 
-        int epochLength = 0;
+        // Open streams
+        mnistParser::training::trainImgStrm.open("./data/train-images.idx3-ubyte", std::ios::binary);
+        mnistParser::training::trainLabelStrm.open("./data/train-labels.idx1-ubyte", std::ios::binary);
+        
         // Neural network loop
         while (true) {
             guessProb = 0;
@@ -84,95 +89,100 @@ namespace mnistNN {
             while (loopCounter < epochLength) {
                 costFunction = 0;
 
-                // FORWARD PROPAGATION
+                // Reset
                 for (int i = 0; i < targetResult.size(); i++) {
                     targetResult[i] = 0;
                 }
-                targetNumber = loopCounter % 10;
-                int imageNumber = statpack::randomInt(1, 5421); // TODO: Images are in bit format atm!!
-                targetResult[targetNumber] = 1;
 
-        //         double[] inputs = calculateBlackWhiteValues(targetNumber, imageNumber); // Get color shades from random image
-        //         inputs = normalizeInputs(inputs); //Normalize inputs to a range of 0 to 1
+                // Get random image
+                int imageInd = statpack::randomInt(0, 59999); // TODO: Images are in bit format atm!!
+                std::array<float, mnistParser::IMAGE_PIXELS> inputs = mnistParser::training::getImage(imageInd);
+                int imageNr = mnistParser::training::getImageNr(imageInd);
+                targetResult[imageNr] = 1;
 
-        //         // Calculate wsum for each hLayerN1 neurons
-        //         for (int i = 0; i < hLayerN1; i++) {
-        //             wSum1[i] = weightedSum(inputs, weights1[i])+bias1[i];
-        //             hiddenNeuron1[i] = sigmoid(wSum1[i]);
-        //         }
+                // FORWARD PROPAGATION
+                inputs = statpack::standardize<mnistParser::IMAGE_PIXELS>(inputs);
 
-        //         // Calculate wsum for each hLayerN2 neurons
-        //         for (int i = 0; i < hLayerN2; i++) {
-        //             wSum2[i] = weightedSum(hiddenNeuron1, weights2[i])+bias2[i];
-        //             hiddenNeuron2[i] = sigmoid(wSum2[i]);
-        //         }
+                // Calculate wsum for each hLayerN1 neurons
+                for (int i = 0; i < hLayerN1; i++) {
+                    wSum1[i] = statpack::weightedSum<mnistParser::IMAGE_PIXELS>(inputs, weights1[i]) + bias1[i];
+                    hiddenNeuron1[i] = statpack::sigmoid(wSum1[i]);
+                }
 
-        //         // Calculate wsum from the hidden layer to get the final result and then calculate error
-        //         for (int i = 0; i < 10; i++) {
-        //             wSum3[i] = weightedSum(hiddenNeuron2, weights3[i])+bias3[i];
-        //             result[i] = sigmoid(wSum3[i]);
+                // Calculate wsum for each hLayerN2 neurons
+                for (int i = 0; i < hLayerN2; i++) {
+                    wSum2[i] = statpack::weightedSum<hLayerN1>(hiddenNeuron1, weights2[i])+bias2[i];
+                    hiddenNeuron2[i] = statpack::sigmoid(wSum2[i]);
+                }
 
-        //             costFunction += Math.pow(targetResult[i] - result[i], 2);// / (double)epochLength;
-        //         }
-        //         costFunctionAv += costFunction/(double)epochLength;
+                // Calculate wsum from the hidden layer to get the final result and then calculate error
+                for (int i = 0; i < 10; i++) {
+                    wSum3[i] = statpack::weightedSum<hLayerN2>(hiddenNeuron2, weights3[i])+bias3[i];
+                    result[i] = statpack::sigmoid(wSum3[i]);
 
-        //         // START BACKPROPAGATION
-        //         for (int i = 0; i < 10; i++) {
-        //             backPropTerm = -sigmoidDerivative(wSum3[i])*2*(targetResult[i]-result[i]);
+                    costFunction += std::pow(targetResult[i] - result[i], 2);
+                }
+                costFunctionAv += costFunction / (float)epochLength;
 
-        //             for (int k = 0; k < hLayerN2; k++) {
-        //                 deltaWeights3[i][k] += hiddenNeuron2[k]*backPropTerm;///(double)epochLength;
-        //                 deltaHiddenNeuron2[k] += weights2[i][k]*backPropTerm;
-        //             }
-        //             deltaBias3[i] += backPropTerm;///(double)epochLength;
-        //         }
+                // START BACKPROPAGATION
+                for (int i = 0; i < 10; i++) {
+                    backPropTerm = -statpack::sigmoidDerivative(wSum3[i])*2*(targetResult[i]-result[i]);
 
-        //         for (int i = 0; i < hLayerN2; i++) {
-        //             backPropTerm = sigmoidDerivative(wSum2[i])*deltaHiddenNeuron2[i];
-        //             for (int k = 0; k < hLayerN1; k++) {
-        //                 deltaWeights2[i][k] += hiddenNeuron1[k]*backPropTerm;///(double)epochLength;
-        //                 deltaHiddenNeuron1[k] += weights1[i][k]*backPropTerm;
-        //             }
-        //             deltaBias2[i] += backPropTerm;///(double)epochLength;
-        //             deltaHiddenNeuron2[i]=0;
-        //         }
+                    for (int k = 0; k < hLayerN2; k++) {
+                        deltaWeights3[i][k] += hiddenNeuron2[k]*backPropTerm;
+                        deltaHiddenNeuron2[k] += weights2[i][k]*backPropTerm;
+                    }
+                    deltaBias3[i] += backPropTerm;
+                }
 
-        //         for (int i = 0; i < hLayerN1; i++) {
-        //             backPropTerm = sigmoidDerivative(wSum1[i])*deltaHiddenNeuron1[i];
-        //             for (int k = 0; k < 784; k++) {
-        //                 deltaWeights1[i][k] += inputs[k]*backPropTerm;///(double)epochLength;
-        //             }
-        //             deltaBias1[i] += backPropTerm;///(double)epochLength;
-        //             deltaHiddenNeuron1[i]=0;
-        //         }
+                for (int i = 0; i < hLayerN2; i++) {
+                    backPropTerm = statpack::sigmoidDerivative(wSum2[i])*deltaHiddenNeuron2[i];
+                    for (int k = 0; k < hLayerN1; k++) {
+                        deltaWeights2[i][k] += hiddenNeuron1[k]*backPropTerm;
+                        deltaHiddenNeuron1[k] += weights1[i][k]*backPropTerm;
+                    }
+                    deltaBias2[i] += backPropTerm;
+                    deltaHiddenNeuron2[i] = 0;
+                }
 
-        //         if (maxValInd(result) == targetNumber) {
-        //             guessProb += 1;
-        //         }
+                for (int i = 0; i < hLayerN1; i++) {
+                    backPropTerm = statpack::sigmoidDerivative(wSum1[i])*deltaHiddenNeuron1[i];
+                    for (int k = 0; k < 784; k++) {
+                        deltaWeights1[i][k] += inputs[k]*backPropTerm;
+                    }
+                    deltaBias1[i] += backPropTerm;
+                    deltaHiddenNeuron1[i] = 0;
+                }
 
-                loopCounter++;
+                if (statpack::maxValInd<int,10>(result) == targetNumber) {
+                    guessProb += 1;
+                }
+
+                ++loopCounter;
             }
 
-        //     iterations++;
+            ++iterations;
 
-        //     if (iterations % 50 == 0) {
-        //         System.out.println(Double.toString(guessProb) + " / " + Integer.toString(epochLength) + " --- " + Double.toString(costFunctionAv) + " " + Integer.toString(iterations));
-        //     }
-        //     if (iterations % 5000 == 0) {
-        //         if (iterations == 35000) {
-        //             learnRate = 2;
-        //         } else if (iterations == 75000) {
-        //             learnRate = .3;
-        //         } else if (iterations == 110000) {
-        //             learnRate = .05;
-        //         }
-        //         System.out.println("Learn rate changed to: " + Double.toString(learnRate));
-        //         List<String> saveWeights1 = new ArrayList<>();//Arrays.asList("The first line", "The second line");
-        //         List<String> saveWeights2 = new ArrayList<>();
-        //         List<String> saveWeights3 = new ArrayList<>();
-        //         List<String> saveBiases1 = new ArrayList<>();
-        //         List<String> saveBiases2 = new ArrayList<>();
-        //         List<String> saveBiases3 = new ArrayList<>();
+            if (iterations % 100 == 0) {
+                std::cout << guessProb << " / " << epochLength << " --- " << costFunctionAv << " " << iterations << "\n";
+            }
+
+            // if (iterations % 5000 == 0) {
+            //     if (iterations == 35000) {
+            //         learnRate = 2;
+            //     } else if (iterations == 75000) {
+            //         learnRate = .3;
+            //     } else if (iterations == 110000) {
+            //         learnRate = .05;
+            //     }
+                
+            //     std::cout << "Learn rate changed to: " << learnRate << "\n";
+                // List<String> saveWeights1 = new ArrayList<>();
+                // List<String> saveWeights2 = new ArrayList<>();
+                // List<String> saveWeights3 = new ArrayList<>();
+                // List<String> saveBiases1 = new ArrayList<>();
+                // List<String> saveBiases2 = new ArrayList<>();
+                // List<String> saveBiases3 = new ArrayList<>();
         //         for (int i = 0; i < hLayerN1; i++) {
         //             for (int k = 0; k < 784; k++) {
         //                 saveWeights1.add(Double.toString(weights1[i][k]));
@@ -233,34 +243,37 @@ namespace mnistNN {
         //             return;
         //         }
         //         costFunctionLimit = costFunctionLimit*0.9;
-        //     }
+            // }
 
-        //     for (int i = 0; i < 10; i++) {
-        //         for (int k = 0; k < hLayerN2; k++) {
-        //             weights3[i][k] += -(deltaWeights3[i][k])*learnRate/(double)epochLength;
-        //             deltaWeights3[i][k] = 0;
-        //         }
-        //         bias3[i] += -deltaBias3[i]*learnRate/(double)epochLength;
-        //         deltaBias3[i] = 0;
-        //     }
+            for (int i = 0; i < 10; i++) {
+                for (int k = 0; k < hLayerN2; k++) {
+                    weights3[i][k] += -(deltaWeights3[i][k])*learnRate/(double)epochLength;
+                    deltaWeights3[i][k] = 0;
+                }
+                bias3[i] += -deltaBias3[i]*learnRate/(double)epochLength;
+                deltaBias3[i] = 0;
+            }
 
-        //     for (int i = 0; i < hLayerN2; i++) {
-        //         for (int k = 0; k < hLayerN1; k++) {
-        //             weights2[i][k] += -(deltaWeights2[i][k])*learnRate/(double)epochLength;
-        //             deltaWeights2[i][k] = 0;
-        //         }
-        //         bias2[i] += -deltaBias2[i]*learnRate/(double)epochLength;
-        //         deltaBias2[i] = 0;
-        //     }
+            for (int i = 0; i < hLayerN2; i++) {
+                for (int k = 0; k < hLayerN1; k++) {
+                    weights2[i][k] += -(deltaWeights2[i][k])*learnRate/(double)epochLength;
+                    deltaWeights2[i][k] = 0;
+                }
+                bias2[i] += -deltaBias2[i]*learnRate/(double)epochLength;
+                deltaBias2[i] = 0;
+            }
 
-        //     for (int i = 0; i < hLayerN2; i++) {
-        //         for (int k = 0; k < 784; k++) {
-        //             weights1[i][k] += -(deltaWeights1[i][k])*learnRate/(double)epochLength;
-        //             deltaWeights1[i][k] = 0;
-        //         }
-        //         bias1[i] += -deltaBias1[i]*learnRate/(double)epochLength;
-        //         deltaBias1[i] = 0;
-        //     }
+            for (int i = 0; i < hLayerN2; i++) {
+                for (int k = 0; k < 784; k++) {
+                    weights1[i][k] += -(deltaWeights1[i][k])*learnRate/(double)epochLength;
+                    deltaWeights1[i][k] = 0;
+                }
+                bias1[i] += -deltaBias1[i]*learnRate/(double)epochLength;
+                deltaBias1[i] = 0;
+            }
         }
+
+        mnistParser::training::trainImgStrm.close();
+        mnistParser::training::trainLabelStrm.close();
     }
 }

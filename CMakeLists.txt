@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 # specify compilers
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_CXX_COMPILER g++)

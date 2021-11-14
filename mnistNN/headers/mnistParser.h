@@ -1,7 +1,21 @@
 #pragma once
-#include <cstddef> // size_t
+
+#include <fstream>
+#include <array>
 
 namespace mnistParser {
+    constexpr const int IMAGE_PIXELS = 784; // 28x28
+    
+    constexpr const int IMAGE_OFFSET = 16; // 32 * 4 = 128 bits = 16 bytes
+    constexpr const int LABEL_OFFSET = 8; // 32 * 2 = 64 bits = 8 bytes
+    
+    constexpr const int TRAIN_DATA_SIZE = 47040016;
+    constexpr const int TRAIN_LABEL_SIZE = 60008;
+
+    constexpr const int TRAIN_IMAGE_MAX = 60000;
+
+    int flipInt32(int32_t i);
+
     /**
      * TEST SET LABEL FILE (t10k-labels-idx1-ubyte):
      * [offset] [type]          [value]          [description]
@@ -52,6 +66,26 @@ namespace mnistParser {
      * xxxx     unsigned byte   ??               pixel
      */
     namespace training {
-        size_t getItemCount();
+        extern int32_t currentImageNr; 
+        extern std::array<int32_t, IMAGE_PIXELS> currentImageInt;
+        extern std::array<float, IMAGE_PIXELS> currentImageFloat;
+        
+        // Open these streams to point to the proper files
+        extern std::ifstream trainImgStrm;
+        extern std::ifstream trainLabelStrm;
+
+        extern std::ofstream saveWeights1;
+        extern std::ofstream saveWeights2;
+        extern std::ofstream saveWeights3;
+        extern std::ofstream saveBiases1;
+        extern std::ofstream saveBiases2;
+        extern std::ofstream saveBiases3;
+
+        // void openInputStreams();
+        // void openOutputStreams();
+        // void closeInputStreams();
+        // void closeOutputStreams();
+        std::array<float, IMAGE_PIXELS> getImage(int32_t nr);
+        int32_t getImageNr(int32_t nr);
     }    
 }
