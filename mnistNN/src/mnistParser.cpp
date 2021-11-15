@@ -1,6 +1,7 @@
 #include "mnistParser.h"
 #include <cstddef> // size_t
 #include <fstream>
+#include <iostream>
 
 namespace mnistParser {
     int flipInt32(int32_t i) {
@@ -39,10 +40,14 @@ namespace mnistParser {
             if (pos >= TRAIN_DATA_SIZE) {
                 return currentImageFloat;
             }
-            trainImgStrm.seekg(pos, std::ios_base::beg);
-            for (int i = 0; i < IMAGE_PIXELS; ++i) {
-                trainImgStrm.read(reinterpret_cast<char*>(&currentImageInt[i]), 1);
-                currentImageFloat[i] = (float)currentImageInt[i];
+            if (trainImgStrm.is_open()) {
+                trainImgStrm.seekg(pos, std::ios_base::beg);
+                for (int i = 0; i < IMAGE_PIXELS; ++i) {
+                    trainImgStrm.read(reinterpret_cast<char*>(&currentImageInt[i]), 1);
+                    currentImageFloat[i] = (float)currentImageInt[i];
+                }
+            } else {
+                std::cout << "Training image stream is not open!\n";
             }
             return currentImageFloat;
         }
@@ -52,7 +57,12 @@ namespace mnistParser {
             if (pos >= TRAIN_LABEL_SIZE) {
                 return currentImageNr;
             }
-            trainLabelStrm.seekg(pos, std::ios_base::beg);
+            if (trainLabelStrm.is_open()) {
+                trainLabelStrm.seekg(pos, std::ios_base::beg);
+                trainLabelStrm.read(reinterpret_cast<char*>(&currentImageNr), 1);
+            } else {
+                std::cout << "Training label stream is not open!\n";
+            }
             return currentImageNr;
         }
     }

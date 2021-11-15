@@ -18,10 +18,10 @@ namespace statpack {
     }
 
     float sigmoid(float x) {
-        return 1 / (1 + std::exp(-x));
+        return 1.0f / (1.0f + std::exp(-x));
     }
 
     float sigmoidDerivative(float x) {
-        return sigmoid(x) * (1 - sigmoid(x));
+        return sigmoid(x) * (1.0f - sigmoid(x));
     }
 }
