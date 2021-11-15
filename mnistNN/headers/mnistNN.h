@@ -9,7 +9,7 @@ namespace mnistNN {
     void initWeight(std::array<std::array<float, A>, B> &weightArr, std::string filePath);
     template <int A> 
     void initBias(std::array<float, A> &biasArr, std::string filePath);
-
+    float initLearnRate(std::string filePath);
 
     void train_v1(std::string images, std::string labels, std::string initValRoot);
 }

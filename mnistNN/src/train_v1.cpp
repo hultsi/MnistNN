@@ -8,6 +8,16 @@
 
 // TODO: Change all std::array<std::array<...>> to one dimensionals...
 namespace mnistNN {
+    float initLearnRate(std::string filePath) {
+        std::ifstream input(filePath);
+        float val;
+        if (input.is_open()) {
+            input >> val;   
+        }
+        input.close();
+        return val;
+    }
+
     void train_v1(std::string images, std::string labels, std::string initValRoot) {
         float learnRate = 500;
 
@@ -54,6 +64,11 @@ namespace mnistNN {
             initBias<hLayerN1>(bias1, initValRoot + "/biases1.txt");
             initBias<hLayerN2>(bias2, initValRoot + "/biases2.txt");
             initBias<10>(bias3, initValRoot + "/biases3.txt");
+            
+            float lrate = initLearnRate(initValRoot + "/learnrate.txt");
+            if (lrate != 0) {
+                learnRate = lrate;
+            }
         }
         std::array<float, 10> result;
         std::array<float, 10> targetResult;
@@ -185,7 +200,7 @@ namespace mnistNN {
             ++iterations;
 
             if (iterations % 50 == 0) {
-                const float p = (float)guessProb / 1000.0f;
+                const float p = (float)guessProb / (epochLength * 50);
                 pPrev = p;
                 guessProb = 0;
 
@@ -238,7 +253,11 @@ namespace mnistNN {
                     }
                     mnistParser::training::outStream.close();
 
-                    std::cout << "Weights and biases save succesfully!\n";
+                    mnistParser::training::outStream.open("./learnrate.txt");
+                    mnistParser::training::outStream << learnRate << "\n";
+                    mnistParser::training::outStream.close();
+
+                    std::cout << "Weights, biases & learn rate save succesfully!\n";
                 }
             }
 
