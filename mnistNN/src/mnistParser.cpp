@@ -26,12 +26,7 @@ namespace mnistParser {
         std::ifstream trainImgStrm;
         std::ifstream trainLabelStrm;
         
-        std::ofstream saveWeights1;
-        std::ofstream saveWeights2;
-        std::ofstream saveWeights3;
-        std::ofstream saveBiases1;
-        std::ofstream saveBiases2;
-        std::ofstream saveBiases3;
+        std::ofstream outStream;
 
         // TODO: Optimize some day if I care enough
         // Returns float array for easier life afterwards

@@ -74,12 +74,7 @@ namespace mnistParser {
         extern std::ifstream trainImgStrm;
         extern std::ifstream trainLabelStrm;
 
-        extern std::ofstream saveWeights1;
-        extern std::ofstream saveWeights2;
-        extern std::ofstream saveWeights3;
-        extern std::ofstream saveBiases1;
-        extern std::ofstream saveBiases2;
-        extern std::ofstream saveBiases3;
+        extern std::ofstream outStream;
 
         // void openInputStreams();
         // void openOutputStreams();
