@@ -1,5 +1,3 @@
-// THIS FILE IS ATM USED FOR TESTING
-// THAT EVERYTHING WORKS AS INTENDED
 // TODO: do better
 #include <iostream>
 #include <string>
