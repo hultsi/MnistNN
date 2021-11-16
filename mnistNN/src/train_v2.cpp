@@ -22,7 +22,7 @@ namespace mnistNN {
         std::cout << "Initiating train_v1\n";
         float learnRate = 500;
 
-        constexpr const int inputLayerSize = 784;
+        constexpr const int inputLayerSize = 196; // 784 / 4
         constexpr const int hLayerN1 = 20;
         constexpr const int hLayerN2 = 10;
         constexpr const int outputN = 10;
@@ -131,9 +131,10 @@ namespace mnistNN {
 
                 // Get random image
                 int imageInd = statpack::randomInt(0, 59999); // min = 0, max = 59999
-                std::array<float, mnistParser::IMAGE_PIXELS> inputs = mnistParser::training::getImage(imageInd);
+                std::array<float, mnistParser::IMAGE_PIXELS> inputs0 = mnistParser::training::getImage(imageInd);
+                std::array<float, inputLayerSize> inputs = statpack::rescaleMnistToHalf<float, inputLayerSize>(inputs0);
                 for (int i = 0; i < inputLayerSize; ++i) {
-                    if (inputs[i] > 90)
+                    if (inputs[i] > 20)
                         inputs[i] = 255;
                     else
                         inputs[i] = 0;
