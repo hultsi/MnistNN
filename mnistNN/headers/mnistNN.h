@@ -16,6 +16,7 @@ namespace mnistNN {
 
     void test_v1(std::string images, std::string labels, std::string initValRoot);
     void test_v2(std::string images, std::string labels, std::string initValRoot);
+    void test_combined(std::string images, std::string labels, std::string initValRoot_v1, std::string initValRoot_v2);
 }
 
 namespace mnistNN {

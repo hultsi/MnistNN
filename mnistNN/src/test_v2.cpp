@@ -23,7 +23,7 @@ namespace mnistNN {
         std::array<float, hLayerN2> bias2;
         std::array<float, outputN> bias3;
 
-        // Randomize initial weights
+        // Load initial weights
         initWeight<inputLayerSize, hLayerN1>(weights1, initValRoot + "/weights1.txt");
         initWeight<hLayerN1, hLayerN2>(weights2, initValRoot + "/weights2.txt");
         initWeight<hLayerN2, outputN>(weights3, initValRoot + "/weights3.txt");
@@ -66,12 +66,12 @@ namespace mnistNN {
 
             std::array<float, mnistParser::IMAGE_PIXELS> inputs0 = mnistParser::test::getImage(imageInd);
             std::array<float, inputLayerSize> inputs = statpack::rescaleMnistToHalf<float, inputLayerSize>(inputs0);
-                for (int i = 0; i < inputLayerSize; ++i) {
-                    if (inputs[i] > 20)
-                        inputs[i] = 255;
-                    else
-                        inputs[i] = 0;
-                }
+            for (int i = 0; i < inputLayerSize; ++i) {
+                if (inputs[i] > 20)
+                    inputs[i] = 255;
+                else
+                    inputs[i] = 0;
+            }
             int targetNumber = mnistParser::test::getImageNr(imageInd);
             targetResult[targetNumber] = 1;
 

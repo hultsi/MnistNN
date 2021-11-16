@@ -23,7 +23,7 @@ namespace mnistNN {
         std::array<float, hLayerN2> bias2;
         std::array<float, outputN> bias3;
 
-        // Randomize initial weights
+        // Load initial weights
         initWeight<inputLayerSize, hLayerN1>(weights1, initValRoot + "/weights1.txt");
         initWeight<hLayerN1, hLayerN2>(weights2, initValRoot + "/weights2.txt");
         initWeight<hLayerN2, outputN>(weights3, initValRoot + "/weights3.txt");

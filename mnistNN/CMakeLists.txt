@@ -14,6 +14,7 @@ add_library(${PROJECT_NAME} STATIC
     src/train_v2.cpp
     src/test_v1.cpp
     src/test_v2.cpp
+    src/test_combined.cpp
 )
 
 # TODO: change to PRIVATE and create public interface ?
