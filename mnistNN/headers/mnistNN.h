@@ -13,6 +13,9 @@ namespace mnistNN {
 
     void train_v1(std::string images, std::string labels, std::string initValRoot);
     void train_v2(std::string images, std::string labels, std::string initValRoot);
+
+    void test_v1(std::string images, std::string labels, std::string initValRoot);
+    void test_v2(std::string images, std::string labels, std::string initValRoot);
 }
 
 namespace mnistNN {

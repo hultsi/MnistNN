@@ -12,8 +12,12 @@ namespace mnistParser {
     constexpr const int TRAIN_DATA_SIZE = 47040016;
     constexpr const int TRAIN_LABEL_SIZE = 60008;
 
-    constexpr const int TRAIN_IMAGE_MAX = 60000;
+    constexpr const int TEST_DATA_SIZE = 7840016;
+    constexpr const int TEST_LABEL_SIZE = 10008;
 
+    constexpr const int TRAIN_IMAGE_MAX = 60000;
+    constexpr const int TEST_IMAGE_MAX = 60000;
+    
     int flipInt32(int32_t i);
 
     /**
@@ -40,7 +44,18 @@ namespace mnistParser {
      * Pixels are organized row-wise. Pixel values are 0 to 255. 0 means background (white), 255 means foreground (black).
      */
     namespace test {
+        extern int32_t currentImageNr; 
+        extern std::array<int32_t, IMAGE_PIXELS> currentImageInt;
+        extern std::array<float, IMAGE_PIXELS> currentImageFloat;
+        
+        // Open these streams to point to the proper files
+        extern std::ifstream testImgStrm;
+        extern std::ifstream testLabelStrm;
 
+        extern std::ofstream outStream;
+
+        std::array<float, IMAGE_PIXELS> getImage(int32_t nr);
+        int32_t getImageNr(int32_t nr);
     }
 
     /**

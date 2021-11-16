@@ -12,6 +12,8 @@ add_library(${PROJECT_NAME} STATIC
     src/statpack.cpp
     src/train_v1.cpp
     src/train_v2.cpp
+    src/test_v1.cpp
+    src/test_v2.cpp
 )
 
 # TODO: change to PRIVATE and create public interface ?
