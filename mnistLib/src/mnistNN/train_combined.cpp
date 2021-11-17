@@ -67,8 +67,8 @@ namespace mnistNN {
         constexpr const int D_LEN = 1000;
         time_point t0;
         time_point t1;
-        int p0 = 0.1;
-        int p1 = 0.1;
+        float p0 = 0.1;
+        float p1 = 0.1;
 
         mnistParser::training::trainImgStrm.open(images, std::ios::binary);
         mnistParser::training::trainLabelStrm.open(labels, std::ios::binary);
@@ -203,15 +203,20 @@ namespace mnistNN {
                 }
             }
 
-            if (iterations % 1000 == 0) {
+            if (iterations % D_LEN == 0) {
+                p1 /= static_cast<float>(D_LEN * epochLength);
                 t1 = std::chrono::steady_clock::now();
                 std::chrono::duration<double> diff_time = t1 - t0;
                 float diff_probability = p1 - p0;
-                std::cout << "Time for 1000 iterations: " << diff_time.count()                    << "\n" <<
-                             "Change of probability: "    << diff_probability                     << "\n" <<
-                             "And time derivative: "      << diff_probability / diff_time.count() << "1/s";
+                
+                std::cout << " ------------------------------------------------------------- \n";
+                std::cout << "Time for " << D_LEN << " iterations: " << diff_time.count()         << " seconds \n";
+                std::cout << "Change of probability: "    << diff_probability                     << " %\n";
+                std::cout << "And time derivative: "      << (diff_probability * 60) / diff_time.count() << " %/min\n";
+                std::cout << " ------------------------------------------------------------- \n";
+
                 p0 = p1;
-                t0 = t1;
+                t0 = std::chrono::steady_clock::now();
             }
         }
 

@@ -57,7 +57,6 @@ namespace mnistNN {
         }
 
         void randomizeWeights() {
-            std::cout << "Randomizing weights and biases\n";
             for (int k = 0; k < hLayerN1; k++) {
                 for (int i = 0; i < inputLayerSize; i++) {
                     weights1[k][i] = statpack::randomFloat(0,1) - .5f;
