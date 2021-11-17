@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-# set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Debug)
 
 # specify compilers
 set(CMAKE_C_COMPILER gcc)
@@ -14,5 +14,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 project(RandomNN CXX)
 
 # Bundle together
-add_subdirectory(mnistNN)
+add_subdirectory(mnistLib)
 add_subdirectory(app)

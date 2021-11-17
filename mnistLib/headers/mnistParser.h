@@ -16,10 +16,11 @@ namespace mnistParser {
     constexpr const int TEST_LABEL_SIZE = 10008;
 
     constexpr const int TRAIN_IMAGE_MAX = 60000;
-    constexpr const int TEST_IMAGE_MAX = 60000;
+    constexpr const int TEST_IMAGE_MAX = 10000;
     
     int flipInt32(int32_t i);
-
+    float initLearnRate(std::string path);
+    
     /**
      * TEST SET LABEL FILE (t10k-labels-idx1-ubyte):
      * [offset] [type]          [value]          [description]

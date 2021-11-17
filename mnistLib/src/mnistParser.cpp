@@ -13,6 +13,16 @@ namespace mnistParser {
         return ((int32_t)a << 24) + ((int32_t)b << 16) + ((int32_t)c << 8) + ((int32_t)d);
     }
 
+    float initLearnRate(std::string filePath) {
+        std::ifstream input(filePath);
+        float val;
+        if (input.is_open()) {
+            input >> val;   
+        }
+        input.close();
+        return val;
+    }
+    
     namespace test {
         std::array<int32_t, IMAGE_PIXELS> currentImageInt;
         std::array<float, IMAGE_PIXELS> currentImageFloat;

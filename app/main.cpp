@@ -20,7 +20,8 @@ int main(int argc, char *argv[]) {
         // mnistNN::train_v2(images, labels, root);
         // mnistNN::test_v1(images, labels, root);
         // mnistNN::test_v2(images, labels, root);
-        mnistNN::test_combined(images, labels, root, root2);
+        // mnistNN::test_combined(images, labels, root, root2);
+        mnistNN::train_combined(images, labels, root, root2);
     } else {
         std::cout << "First argument should be the mnist image binary file " <<
                      "Second argument should be the mnist label binary file\n";

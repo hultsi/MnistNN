@@ -159,7 +159,15 @@ namespace mnistNN {
             }
 
             for (int i = 0; i < 10; ++i) {
-                result[i] = (v1.result[i] + v2.result[i]) / 2;
+                int maxV1 = statpack::maxValInd<float,10>(v1.result);
+                int maxV2 = statpack::maxValInd<float,10>(v2.result);
+                result[i] = v1.result[i];
+                if (maxV1 != maxV2) {
+                    if (v1.result[maxV1] - v2.result[maxV2] < .1) {
+                        result[i] = v2.result[i];
+                    }
+                }
+                // result[i] = (v1.result[i] + v2.result[i]) / 2;
                 costFunction += std::pow(targetResult[i] - result[i], 2);
                 costFunctionAv += costFunction / (float) mnistParser::TEST_IMAGE_MAX;
             }

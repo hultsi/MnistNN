@@ -22,7 +22,7 @@ namespace mnistNN {
         std::cout << "Initiating train_v1\n";
         float learnRate = 500;
 
-        constexpr const int inputLayerSize = 784;
+        constexpr const int inputLayerSize = 196; // 784 / 4
         constexpr const int hLayerN1 = 20;
         constexpr const int hLayerN2 = 10;
         constexpr const int outputN = 10;
@@ -69,7 +69,7 @@ namespace mnistNN {
             initBias<hLayerN2>(bias2, initValRoot + "/biases2.txt");
             initBias<outputN>(bias3, initValRoot + "/biases3.txt");
             
-            float lrate = initLearnRate(initValRoot + "/learnrate.txt");
+            float lrate = mnistParser::initLearnRate(initValRoot + "/learnrate.txt");
             if (lrate != 0) {
                 learnRate = lrate;
             }
@@ -101,10 +101,7 @@ namespace mnistNN {
         int loopCounter = 0;
         int targetNumber = 0;
         int epochLength = 100;
-
-        // Get starting time
-        // DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
-        // Date dateobj = new Date();
+        int iterLimit = 100;
 
         // Open input streams
         mnistParser::training::trainImgStrm.open(images, std::ios::binary);
@@ -131,9 +128,10 @@ namespace mnistNN {
 
                 // Get random image
                 int imageInd = statpack::randomInt(0, 59999); // min = 0, max = 59999
-                std::array<float, mnistParser::IMAGE_PIXELS> inputs = mnistParser::training::getImage(imageInd);
+                std::array<float, mnistParser::IMAGE_PIXELS> inputs0 = mnistParser::training::getImage(imageInd);
+                std::array<float, inputLayerSize> inputs = statpack::rescaleMnistToHalf<float, inputLayerSize>(inputs0);
                 for (int i = 0; i < inputLayerSize; ++i) {
-                    if (inputs[i] > 90)
+                    if (inputs[i] > 20)
                         inputs[i] = 255;
                     else
                         inputs[i] = 0;
@@ -204,14 +202,8 @@ namespace mnistNN {
 
             ++iterations;
 
-            if (iterations % 100 == 0) {
-                // std::cout << "Saving funstats...\n";
-                // mnistParser::training::outStream.open("./funstats.txt");
-                // mnistParser::training::outStream << guessProb << " " << learnRate << "\n";
-                // mnistParser::training::outStream.close();
-                // std::cout << "Saving successfull...\n";
-
-                const float p = guessProb / (float)(epochLength * 100);
+            if (iterations % iterLimit == 0) {
+                const float p = guessProb / (float)(epochLength * iterLimit);
                 pPrev = p;
                 guessProb = 0;
 
@@ -225,7 +217,6 @@ namespace mnistNN {
                     learnRate *= 1.25;
                     std::cout << "Seems like a local minima, increasing learn rate to: " << learnRate << "\n";
                 } else {
-                // if (costFunctionAv < 0.02) {
                     costFunctionTracker = costFunctionAv;
                     learnRate *= .5;
                     std::cout << "Learn rate changed to: " << learnRate << "\n";
@@ -278,8 +269,6 @@ namespace mnistNN {
 
                         std::cout << "Weights, biases & learn rate save succesfully!\n";
                     }
-
-                    // return;
                 }
             }
 

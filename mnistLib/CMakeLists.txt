@@ -10,11 +10,12 @@ project(MnistNN VERSION 0.0.1 DESCRIPTION "Random MnistNN library")
 add_library(${PROJECT_NAME} STATIC
     src/mnistParser.cpp
     src/statpack.cpp
-    src/train_v1.cpp
-    src/train_v2.cpp
-    src/test_v1.cpp
-    src/test_v2.cpp
-    src/test_combined.cpp
+    src/mnistNN/train_v1.cpp
+    src/mnistNN/train_v2.cpp
+    src/mnistNN/train_combined.cpp
+    src/mnistNN/test_v1.cpp
+    src/mnistNN/test_v2.cpp
+    src/mnistNN/test_combined.cpp
 )
 
 # TODO: change to PRIVATE and create public interface ?
