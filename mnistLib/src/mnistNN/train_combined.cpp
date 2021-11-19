@@ -16,12 +16,12 @@ namespace mnistNN {
         std::cout << "Initiating train_combined\n";
 
         constexpr const int INPUT_LAYER_SIZE_1 =    784;
-        constexpr const int HIDDEN_LAYER_1_SIZE_1 = 20;
-        constexpr const int HIDDEN_LAYER_2_SIZE_1 = 10;
+        constexpr const int HIDDEN_LAYER_1_SIZE_1 = 10;
+        constexpr const int HIDDEN_LAYER_2_SIZE_1 = 40;
 
         constexpr const int INPUT_LAYER_SIZE_2 =    196;
-        constexpr const int HIDDEN_LAYER_1_SIZE_2 = 20;
-        constexpr const int HIDDEN_LAYER_2_SIZE_2 = 10;
+        constexpr const int HIDDEN_LAYER_1_SIZE_2 = 10;
+        constexpr const int HIDDEN_LAYER_2_SIZE_2 = 40;
 
         constexpr const int OUTPUT_LAYER_SIZE = 10;
 
@@ -121,7 +121,7 @@ namespace mnistNN {
                 for (int i = 0; i < OUTPUT_LAYER_SIZE; i++) {
                     nn_1.wSum3[i] = statpack::weightedSum<HIDDEN_LAYER_2_SIZE_1>(nn_1.hiddenNeuron2, nn_1.weights3[i]) + nn_1.bias3[i];
                     nn_2.wSum3[i] = statpack::weightedSum<HIDDEN_LAYER_2_SIZE_2>(nn_2.hiddenNeuron2, nn_2.weights3[i]) + nn_2.bias3[i];
-                    result[i] = statpack::sigmoid(nn_1.wSum3[i] + nn_2.wSum3[i]);
+                    result[i] = statpack::sigmoid( (nn_1.wSum3[i] + nn_2.wSum3[i]) / 2 );
 
                     costFunction += std::pow(targetResult[i] - result[i], 2);
                 }
@@ -131,14 +131,14 @@ namespace mnistNN {
                 // START BACKPROPAGATION //
                 // --------------------- //
                 for (int i = 0; i < OUTPUT_LAYER_SIZE; i++) {
-                    nn_1.backPropTerm = (-1) * 2 * statpack::sigmoidDerivative(nn_1.wSum3[i] + nn_2.wSum3[i]) * (targetResult[i] - result[i]);
+                    nn_1.backPropTerm = (-1) * statpack::sigmoidDerivative( (nn_1.wSum3[i] + nn_2.wSum3[i]) / 2 ) * (targetResult[i] - result[i]);
                     for (int k = 0; k < HIDDEN_LAYER_2_SIZE_1; k++) {
                         nn_1.deltaWeights3[i][k] += nn_1.hiddenNeuron2[k] * nn_1.backPropTerm / (float) epochLength;
                         nn_1.deltaHiddenNeuron2[k] += nn_1.weights3[i][k] * nn_1.backPropTerm;
                     }
                     nn_1.deltaBias3[i] += nn_1.backPropTerm / (float) epochLength;
 
-                    nn_2.backPropTerm = (-1) * 2 * statpack::sigmoidDerivative(nn_1.wSum3[i] + nn_2.wSum3[i]) * (targetResult[i] - result[i]);
+                    nn_2.backPropTerm = (-1) * statpack::sigmoidDerivative( (nn_1.wSum3[i] + nn_2.wSum3[i]) / 2 ) * (targetResult[i] - result[i]);
                     for (int k = 0; k < HIDDEN_LAYER_2_SIZE_2; k++) {
                         nn_2.deltaWeights3[i][k] += nn_2.hiddenNeuron2[k] * nn_2.backPropTerm / (float) epochLength;
                         nn_2.deltaHiddenNeuron2[k] += nn_2.weights3[i][k] * nn_2.backPropTerm;
@@ -179,13 +179,14 @@ namespace mnistNN {
                 std::cout << "Guess probability: " << p << " - Cost function: " << costFunctionAv << " - Iterations: " << iterations << "\n";
             }
 
-            if (iterations % 500 == 0) {
-                if (costFunctionTracker - costFunctionAv < 0.005 && learnRate <= 250) {
-                    learnRate *= 1.25;
+            if (iterations % 1000 == 0) {
+                if (learnRate <= 10 && pPrev <= pMax) {
+                    learnRate = 250;
                     std::cout << "Seems like a local minima, increasing learn rate to: " << learnRate << "\n";
-                } else {
+                } else 
+                {
                     costFunctionTracker = costFunctionAv;
-                    learnRate *= .5;
+                    learnRate *= .75;
                     std::cout << "Learn rate changed to: " << learnRate << "\n";
                     
                     // ---------------- //

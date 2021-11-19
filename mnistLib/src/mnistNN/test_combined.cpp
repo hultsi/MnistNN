@@ -1,188 +1,126 @@
 #include <iostream>
 #include <array>
 #include <string>
+#include <chrono>
 
 #include "mnistNN.h"
 #include "statpack.h"
 #include "mnistParser.h"
+#include "NeuralNet.h"
+
+using time_point = std::chrono::time_point<std::chrono::steady_clock>;
 
 // TODO: Change all std::array<std::array<...>> to one dimensionals...
 namespace mnistNN {
-    struct V1 {
-        static const int inputLayerSize = 784;
-        static const int hLayerN1 = 10;
-        static const int hLayerN2 = 10;
-        static const int outputN = 10;
-
-        std::array<std::array<float, inputLayerSize>, hLayerN1> weights1; //28^2
-        std::array<std::array<float, hLayerN1>, hLayerN2> weights2;
-        std::array<std::array<float, hLayerN2>, outputN> weights3;
-        std::array<float, hLayerN1> bias1;
-        std::array<float, hLayerN2> bias2;
-        std::array<float, outputN> bias3;
-
-        std::array<float, outputN> result;
-        std::array<float, hLayerN1> wSum1;
-        std::array<float, hLayerN2> wSum2;
-        std::array<float, outputN> wSum3;
-        std::array<float, hLayerN1> hiddenNeuron1;
-        std::array<float, hLayerN2> hiddenNeuron2;
-    };
-
-    struct V2 {
-        static const int inputLayerSize = 196;
-        static const int hLayerN1 = 20;
-        static const int hLayerN2 = 10;
-        static const int outputN = 10;
-
-        std::array<std::array<float, inputLayerSize>, hLayerN1> weights1; //28^2
-        std::array<std::array<float, hLayerN1>, hLayerN2> weights2;
-        std::array<std::array<float, hLayerN2>, outputN> weights3;
-        std::array<float, hLayerN1> bias1;
-        std::array<float, hLayerN2> bias2;
-        std::array<float, outputN> bias3;
-        
-        std::array<float, outputN> result;
-        std::array<float, hLayerN1> wSum1;
-        std::array<float, hLayerN2> wSum2;
-        std::array<float, outputN> wSum3;
-        std::array<float, hLayerN1> hiddenNeuron1;
-        std::array<float, hLayerN2> hiddenNeuron2;
-    };
-
-    void test_combined(std::string images, std::string labels, std::string initValRoot_v1, std::string initValRoot_v2) {
+    void test_combined(std::string images, std::string labels, std::string initValRoot1, std::string initValRoot2) {
         std::cout << "Initiating test_combined\n";
 
-        V1 v1;
-        V2 v2;
+        constexpr const int INPUT_LAYER_SIZE_1 =    784;
+        constexpr const int HIDDEN_LAYER_1_SIZE_1 = 10;
+        constexpr const int HIDDEN_LAYER_2_SIZE_1 = 40;
 
-        // Load initial weights
-        initWeight<v1.inputLayerSize, v1.hLayerN1>(v1.weights1, initValRoot_v1 + "/weights1.txt");
-        initWeight<v1.hLayerN1, v1.hLayerN2>(v1.weights2, initValRoot_v1 + "/weights2.txt");
-        initWeight<v1.hLayerN2, v1.outputN>(v1.weights3, initValRoot_v1 + "/weights3.txt");
-        initBias<v1.hLayerN1>(v1.bias1, initValRoot_v1 + "/biases1.txt");
-        initBias<v1.hLayerN2>(v1.bias2, initValRoot_v1 + "/biases2.txt");
-        initBias<v1.outputN>(v1.bias3, initValRoot_v1 + "/biases3.txt");
+        constexpr const int INPUT_LAYER_SIZE_2 =    196;
+        constexpr const int HIDDEN_LAYER_1_SIZE_2 = 10;
+        constexpr const int HIDDEN_LAYER_2_SIZE_2 = 40;
+
+        constexpr const int OUTPUT_LAYER_SIZE = 10;
+
+        NeuralNet<float, INPUT_LAYER_SIZE_1, HIDDEN_LAYER_1_SIZE_1, HIDDEN_LAYER_2_SIZE_1, OUTPUT_LAYER_SIZE> nn_1("nn1");
+        NeuralNet<float, INPUT_LAYER_SIZE_2, HIDDEN_LAYER_1_SIZE_2, HIDDEN_LAYER_2_SIZE_2, OUTPUT_LAYER_SIZE> nn_2("nn2");
+
+        if (initValRoot1 == "") {
+            std::cout << "Randomizing nn 1 weights and biases\n";
+            nn_1.randomizeWeights();
+            nn_1.randomizeBiases();
+        } else {
+            nn_1.loadWeights(initValRoot1);
+            nn_1.loadBiases(initValRoot1);
+        }
+        if (initValRoot2 == "") {
+            std::cout << "Randomizing nn 2 weights and biases\n";
+            nn_2.randomizeWeights();
+            nn_2.randomizeBiases();
+        } else {
+            nn_2.loadWeights(initValRoot2);
+            nn_2.loadBiases(initValRoot2);
+        }
+
+        std::array<float, OUTPUT_LAYER_SIZE> result;
+        std::array<float, OUTPUT_LAYER_SIZE> targetResult;
         
-        // Load initial weights
-        initWeight<v2.inputLayerSize, v2.hLayerN1>(v2.weights1, initValRoot_v2 + "/weights1.txt");
-        initWeight<v2.hLayerN1, v2.hLayerN2>(v2.weights2, initValRoot_v2 + "/weights2.txt");
-        initWeight<v2.hLayerN2, v2.outputN>(v2.weights3, initValRoot_v2 + "/weights3.txt");
-        initBias<v2.hLayerN1>(v2.bias1, initValRoot_v2 + "/biases1.txt");
-        initBias<v2.hLayerN2>(v2.bias2, initValRoot_v2 + "/biases2.txt");
-        initBias<v2.outputN>(v2.bias3, initValRoot_v2 + "/biases3.txt");
-
-        std::array<float, 10> result;
-        std::array<float, 10> targetResult;
-
+        std::array<int, OUTPUT_LAYER_SIZE> missed;
+        
         float costFunction = 0;
-        float costFunctionAv = 0;
         float guessProb = 0;
         int targetNumber = 0;
 
-        // Open input streams
-        mnistParser::test::testImgStrm.open(images, std::ios::binary);
-        mnistParser::test::testLabelStrm.open(labels, std::ios::binary);
-        if (!mnistParser::test::testImgStrm.is_open() || 
-            !mnistParser::test::testLabelStrm.is_open())
+        mnistParser::training::trainImgStrm.open(images, std::ios::binary);
+        mnistParser::training::trainLabelStrm.open(labels, std::ios::binary);
+        if (!mnistParser::training::trainImgStrm.is_open() || 
+            !mnistParser::training::trainLabelStrm.is_open())
         {
             return;   
         }
 
-        // Neural network loop
         std::cout << "Starting testing...\n";
-        for (int imageInd = 0; imageInd < mnistParser::TEST_IMAGE_MAX; ++imageInd) {
-            costFunctionAv = 0;
-            costFunction = 0;
-
+        for (int imageInd = 0; imageInd < 10000; ++imageInd) {
             // Reset
             for (int i = 0; i < targetResult.size(); i++) {
                 targetResult[i] = 0;
             }
-
-            std::array<float, mnistParser::IMAGE_PIXELS> inputs = mnistParser::test::getImage(imageInd);
-            std::array<float, v2.inputLayerSize> inputsv2 = statpack::rescaleMnistToHalf<float, v2.inputLayerSize>(inputs);
-            int targetNumber = mnistParser::test::getImageNr(imageInd);
+            
+            int targetNumber = mnistParser::training::getImageNr(imageInd);
             targetResult[targetNumber] = 1;
 
+            nn_1.inputs = mnistParser::training::getImage(imageInd);
+            nn_2.inputs = statpack::rescaleMnistToHalf<float, INPUT_LAYER_SIZE_1, INPUT_LAYER_SIZE_2>(nn_1.inputs);
 
-            // Calculate version 1 result
-            for (int i = 0; i < v1.inputLayerSize; ++i) {
-                if (inputs[i] > 90)
-                    inputs[i] = 255;
-                else
-                    inputs[i] = 0;
-            }
-            inputs = statpack::standardize<v1.inputLayerSize>(inputs);
-            // Calculate wsum for each hLayerN1 neurons
-            for (int i = 0; i < v1.hLayerN1; i++) {
-                v1.wSum1[i] = statpack::weightedSum<v1.inputLayerSize>(inputs, v1.weights1[i]) + v1.bias1[i];
-                v1.hiddenNeuron1[i] = statpack::sigmoid(v1.wSum1[i]);
-            }
+            constexpr const int someLimit = 80;
+            nn_1.makeBlackAndWhite(someLimit);
+            nn_2.makeBlackAndWhite(someLimit);
 
-            // Calculate wsum for each hLayerN2 neurons
-            for (int i = 0; i < v1.hLayerN2; i++) {
-                v1.wSum2[i] = statpack::weightedSum<v1.hLayerN1>(v1.hiddenNeuron1, v1.weights2[i]) + v1.bias2[i];
-                v1.hiddenNeuron2[i] = statpack::sigmoid(v1.wSum2[i]);
-            }
+            nn_1.inputs = statpack::standardize<INPUT_LAYER_SIZE_1>(nn_1.inputs);
+            nn_2.inputs = statpack::standardize<INPUT_LAYER_SIZE_2>(nn_2.inputs);
 
-            // Calculate wsum from the hidden layer to get the final result and then calculate error
-            for (int i = 0; i < v1.outputN; i++) {
-                v1.wSum3[i] = statpack::weightedSum<v1.hLayerN2>(v1.hiddenNeuron2, v1.weights3[i]) + v1.bias3[i];
-                v1.result[i] = statpack::sigmoid(v1.wSum3[i]);
-            }
+            // ------------------- //
+            // FORWARD PROPAGATION //
+            // ------------------- //
+            nn_1.inputLayerForward();
+            nn_2.inputLayerForward();
 
-            // Calculate version 2 result
-            for (int i = 0; i < v2.inputLayerSize; ++i) {
-                if (inputsv2[i] > 90)
-                    inputsv2[i] = 255;
-                else
-                    inputsv2[i] = 0;
-            }
-            inputsv2 = statpack::standardize<v2.inputLayerSize>(inputsv2);
-            // Calculate wsum for each hLayerN1 neurons
-            for (int i = 0; i < v2.hLayerN1; i++) {
-                v2.wSum1[i] = statpack::weightedSum<v2.inputLayerSize>(inputsv2, v2.weights1[i]) + v2.bias1[i];
-                v2.hiddenNeuron1[i] = statpack::sigmoid(v2.wSum1[i]);
-            }
+            nn_1.hiddenLayer1Forward();
+            nn_2.hiddenLayer1Forward();
 
-            // Calculate wsum for each hLayerN2 neurons
-            for (int i = 0; i < v2.hLayerN2; i++) {
-                v2.wSum2[i] = statpack::weightedSum<v2.hLayerN1>(v2.hiddenNeuron1, v2.weights2[i]) + v2.bias2[i];
-                v2.hiddenNeuron2[i] = statpack::sigmoid(v2.wSum2[i]);
-            }
+            // TODO: do this better
+            // Combine nn1 & nn2 wsum3 by summing and sigmoiding them
+            for (int i = 0; i < OUTPUT_LAYER_SIZE; i++) {
+                nn_1.wSum3[i] = statpack::weightedSum<HIDDEN_LAYER_2_SIZE_1>(nn_1.hiddenNeuron2, nn_1.weights3[i]) + nn_1.bias3[i];
+                nn_2.wSum3[i] = statpack::weightedSum<HIDDEN_LAYER_2_SIZE_2>(nn_2.hiddenNeuron2, nn_2.weights3[i]) + nn_2.bias3[i];
+                result[i] = statpack::sigmoid( (nn_1.wSum3[i] + nn_2.wSum3[i]) / 2 );
 
-            // Calculate wsum from the hidden layer to get the final result and then calculate error
-            for (int i = 0; i < v2.outputN; i++) {
-                v2.wSum3[i] = statpack::weightedSum<v2.hLayerN2>(v2.hiddenNeuron2, v2.weights3[i]) + v2.bias3[i];
-                v2.result[i] = statpack::sigmoid(v2.wSum3[i]);
-            }
-
-            for (int i = 0; i < 10; ++i) {
-                int maxV1 = statpack::maxValInd<float,10>(v1.result);
-                int maxV2 = statpack::maxValInd<float,10>(v2.result);
-                result[i] = v1.result[i];
-                if (maxV1 != maxV2) {
-                    if (v1.result[maxV1] - v2.result[maxV2] < .1) {
-                        result[i] = v2.result[i];
-                    }
-                }
-                // result[i] = (v1.result[i] + v2.result[i]) / 2;
                 costFunction += std::pow(targetResult[i] - result[i], 2);
-                costFunctionAv += costFunction / (float) mnistParser::TEST_IMAGE_MAX;
             }
-
-            if (statpack::maxValInd<float, 10>(result) == targetNumber) {
-                guessProb += 1;
+            
+            if (statpack::maxValInd<float, OUTPUT_LAYER_SIZE>(result) == targetNumber) {
+                ++guessProb;
+            } else {
+                // std::cout << "Missed " << targetNumber << "\n";
+                ++missed[targetNumber];
             }
         }
+                
+        std::cout << " ------------------------------------------------------------- \n";
+        std::cout << "Guess probability: " << guessProb / (float) mnistParser::TEST_IMAGE_MAX << " - Cost function: " << costFunction / (float) mnistParser::TEST_IMAGE_MAX << " seconds \n";
+        std::cout << " ------------------------------------------------------------- \n";
 
-        const float p = guessProb / (float) mnistParser::TEST_IMAGE_MAX;
-        std::cout << "-----------------------------------------------------------\n";
-        std::cout << "Guess probability: " << p << " - Cost function: " << costFunctionAv << "\n";
-        std::cout << "-----------------------------------------------------------\n";
+        int sum = 0;
+        for (int i = 0; i < 10; ++i) {
+            std::cout << "Missed nr " << i << " " << missed[i] << " times\n";
+            sum += missed[i];
+        }
+        std::cout << "Missed total " << sum << "\n";
 
-        mnistParser::test::testImgStrm.close();
-        mnistParser::test::testLabelStrm.close();
+        mnistParser::training::trainImgStrm.close();
+        mnistParser::training::trainLabelStrm.close();
     }
 }

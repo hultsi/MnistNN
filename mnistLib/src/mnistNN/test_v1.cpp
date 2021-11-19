@@ -12,7 +12,7 @@ namespace mnistNN {
         std::cout << "Initiating test_v1\n";
 
         constexpr const int inputLayerSize = 784;
-        constexpr const int hLayerN1 = 10;
+        constexpr const int hLayerN1 = 20;
         constexpr const int hLayerN2 = 10;
         constexpr const int outputN = 10;
 
@@ -38,6 +38,8 @@ namespace mnistNN {
         std::array<float, outputN> wSum3;
         std::array<float, hLayerN1> hiddenNeuron1;
         std::array<float, hLayerN2> hiddenNeuron2;
+
+        std::array<int, outputN> missed;
 
         float costFunction = 0;
         float costFunctionAv = 0;
@@ -100,12 +102,22 @@ namespace mnistNN {
 
             if (statpack::maxValInd<float, outputN>(result) == targetNumber) {
                 guessProb += 1;
+            } else {
+                // std::cout << "Missed " << targetNumber << "\n";
+                ++missed[targetNumber];
             }
         }
         const float p = guessProb / (float) mnistParser::TEST_IMAGE_MAX;
         std::cout << "-----------------------------------------------------------\n";
         std::cout << "Guess probability: " << p << " - Cost function: " << costFunctionAv << "\n";
         std::cout << "-----------------------------------------------------------\n";
+
+        int sum = 0;
+        for (int i = 0; i < 10; ++i) {
+            std::cout << "Missed nr " << i << " " << missed[i] << " times\n";
+            sum += missed[i];
+        }
+        std::cout << "Missed total " << sum << "\n";
 
         mnistParser::test::testImgStrm.close();
         mnistParser::test::testLabelStrm.close();

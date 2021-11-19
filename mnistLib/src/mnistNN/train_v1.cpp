@@ -100,7 +100,7 @@ namespace mnistNN {
         float backPropTerm = 0;
         int loopCounter = 0;
         int targetNumber = 0;
-        int epochLength = 100;
+        int epochLength = 50;
         int iterLimit = 100;
 
         // Open input streams
@@ -212,7 +212,7 @@ namespace mnistNN {
             }
 
             if (iterations % 500 == 0) {
-                if (costFunctionTracker - costFunctionAv < 0.005 && learnRate <= 250) {
+                if (costFunctionTracker - costFunctionAv < 0.0015 && learnRate <= 250) {
                     learnRate *= 1.25;
                     std::cout << "Seems like a local minima, increasing learn rate to: " << learnRate << "\n";
                 } else {
