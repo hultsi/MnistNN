@@ -1,5 +1,4 @@
 #include "mnistParser.h"
-#include <cstddef> // size_t
 #include <fstream>
 #include <iostream>
 

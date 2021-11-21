@@ -110,6 +110,23 @@ namespace mnistNN {
             }
         }
 
+        void hiddenLayer2Forward() {
+            // Calculate wsum for each hLayerN2 neurons
+            for (int i = 0; i < outputN; i++) {
+                wSum3[i] = statpack::weightedSum<hLayerN2>(hiddenNeuron2, weights3[i]) + bias3[i];
+            }
+        }
+
+        void hiddenLayer2Backward(int epochLength) {
+            for (int i = 0; i < outputN; i++) {
+                for (int k = 0; k < hLayerN2; k++) {
+                    deltaWeights3[i][k] += hiddenNeuron2[k] * backPropTerm / (float) epochLength;
+                    deltaHiddenNeuron2[k] += weights3[i][k] * backPropTerm;
+                }
+                deltaBias3[i] += backPropTerm / (float) epochLength;
+            }
+        }
+
         void hiddenLayer1Backward(int epochLength) {
             for (int i = 0; i < hLayerN2; i++) {
                 backPropTerm = statpack::sigmoidDerivative(wSum2[i]) * deltaHiddenNeuron2[i];

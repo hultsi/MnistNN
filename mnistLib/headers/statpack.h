@@ -1,10 +1,19 @@
 #pragma once
 
 #include <array>
+#include <vector>
 #include <random>
 #include <cmath>
+#include <cstddef> // size_t
 
 namespace statpack {
+    template <typename T>
+    struct ImageVector {
+        std::vector<T> data;
+        int width;
+        int height;
+    };
+
     template <int T>
     std::array<float, T> standardize(const std::array<float, T> &inputs);
     template <int T>
@@ -98,6 +107,102 @@ namespace statpack {
                 ind1 += 2;
             }  
             ++ind2;
+        }
+        return out;
+    }
+
+    template <typename T, int WIDTH, int HEIGHT>
+    ImageVector<T> cropBlackBackground(std::array<T, WIDTH*HEIGHT> image) {
+        ImageVector<T> imgOut;
+        constexpr const int BLACK = 0;
+        int xMin = WIDTH;
+        int yMin = HEIGHT;
+        int xMax = 0;
+        int yMax = 0;
+        for (int row = 0; row < HEIGHT; ++row) {
+            for (int col = 0; col < WIDTH; ++col) {
+                if (image.at(col + row*WIDTH) != BLACK) {
+                    xMin = (col < xMin ? col : xMin);
+                    xMax = (col > xMax ? col : xMax);
+                    
+                    yMin = (row < yMin ? row : yMin);
+                    yMax = (row > yMax ? row : yMax);
+                }
+            }
+        }
+        int ind = 0;
+        for (int row = yMin; row < yMax; ++row) {
+            for (int col = xMin; col < xMax; ++col) {
+                imgOut.data.emplace_back(image.at(col + row*WIDTH));
+            }
+        }
+        imgOut.width = xMax - xMin;
+        imgOut.height = yMax - yMin;
+        return imgOut;
+    }
+
+    template <typename K, int W_IN, int H_IN, int W_OUT, int H_OUT>
+    std::array<K, W_OUT*H_OUT> rescaleImage(std::array<K, W_IN*H_IN> img) {
+        std::array<K, W_OUT*H_OUT> tmp{};
+        const float xScale = ( (float) W_OUT ) / ( (float) W_IN );
+        const float yScale = ( (float) H_OUT ) / ( (float) H_IN );
+
+        // horizontal rescale
+        for (int row = 0; row < H_IN; ++row) {
+            for (int pixel = 0; pixel < W_IN; ++pixel) {
+                int thisPixel = std::ceil(xScale * pixel );
+                int nextPixel = std::ceil(xScale * (pixel + 1));
+                
+                for (int i = thisPixel; i < nextPixel; ++i) {
+                    tmp.at(i + row * W_OUT) = img.at(pixel + row * W_IN);
+                }
+            }
+        }
+        
+        std::array<K, W_OUT*H_OUT> out{};
+        // vertical rescale
+        for (int col = 0; col < W_OUT; ++col) {
+            for (int pixel = 0; pixel < H_IN; ++pixel) {
+                int thisPixel = std::ceil(yScale * pixel );
+                int nextPixel = std::ceil(yScale * (pixel + 1));
+                
+                for (int i = thisPixel; i < nextPixel; ++i) {
+                    out.at(col + i * W_OUT) = tmp.at(col + pixel * W_OUT);
+                }
+            }
+        }
+        return out;
+    }
+
+    template <typename K, int W_OUT, int H_OUT>
+    std::array<K, W_OUT*H_OUT> rescaleImage(std::vector<K> img, int width, int height) {
+        std::array<K, W_OUT*H_OUT> tmp{};
+        const float xScale = ( (float) W_OUT ) / ( (float) width );
+        const float yScale = ( (float) H_OUT ) / ( (float) height );
+
+        // horizontal rescale
+        for (int row = 0; row < height; ++row) {
+            for (int pixel = 0; pixel < width; ++pixel) {
+                int thisPixel = std::ceil(xScale * pixel );
+                int nextPixel = std::ceil(xScale * (pixel + 1));
+                
+                for (int i = thisPixel; i < nextPixel; ++i) {
+                    tmp.at(i + row * W_OUT) = img.at(pixel + row * width);
+                }
+            }
+        }
+        
+        std::array<K, W_OUT*H_OUT> out{};
+        // vertical rescale
+        for (int col = 0; col < W_OUT; ++col) {
+            for (int pixel = 0; pixel < height; ++pixel) {
+                int thisPixel = std::ceil(yScale * pixel );
+                int nextPixel = std::ceil(yScale * (pixel + 1));
+                
+                for (int i = thisPixel; i < nextPixel; ++i) {
+                    out.at(col + i * W_OUT) = tmp.at(col + pixel * W_OUT);
+                }
+            }
         }
         return out;
     }
