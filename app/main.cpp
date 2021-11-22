@@ -16,11 +16,11 @@ int main(int argc, char *argv[]) {
             root = argv[3];
         if (argc == 5) 
             root2 = argv[4];
-        mnistNN::train_v1(images, labels, root);
+        // mnistNN::train_v1(images, labels, root);
         // mnistNN::train_v2(images, labels, root);
         // mnistNN::train_combined(images, labels, root, root);
 
-        // mnistNN::test_v1(images, labels, root);
+        mnistNN::test_v1(images, labels, root);
         // mnistNN::test_v2(images, labels, root);
         // mnistNN::test_combined(images, labels, root, root);
     } else {

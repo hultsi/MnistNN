@@ -24,10 +24,10 @@ namespace mnistNN {
 
     void train_v1(std::string images, std::string labels, std::string initValRoot) {
         std::cout << "Initiating train_v1\n";
-        float learnRate = 500;
+        float learnRate = 100;
         constexpr const int INPUT_LAYER_SIZE =    784;
-        constexpr const int HIDDEN_LAYER_1_SIZE = 10;
-        constexpr const int HIDDEN_LAYER_2_SIZE = 40;
+        constexpr const int HIDDEN_LAYER_1_SIZE = 40;
+        constexpr const int HIDDEN_LAYER_2_SIZE = 10;
         constexpr const int OUTPUT_LAYER_SIZE = 10;
 
         NeuralNet<float, INPUT_LAYER_SIZE, HIDDEN_LAYER_1_SIZE, HIDDEN_LAYER_2_SIZE, OUTPUT_LAYER_SIZE> nn("nn1");
@@ -58,7 +58,7 @@ namespace mnistNN {
         float backPropTerm = 0;
         int loopCounter = 0;
         int targetNumber = 0;
-        int epochLength = 50;
+        int epochLength = 100;
 
         // Used to measure drivative of the NN accuracy
         constexpr const int D_LEN = 1000;
@@ -92,18 +92,18 @@ namespace mnistNN {
 
                 int imageInd = statpack::randomInt(0, 59999); // min = 0, max = 59999
                 
+                nn.inputs = mnistParser::training::getImage(imageInd);
                 int targetNumber = mnistParser::training::getImageNr(imageInd);
                 targetResult[targetNumber] = 1;
-
-                nn.inputs = mnistParser::training::getImage(imageInd);
-
+                
                 // Crop & scale image and do preprocessing
                 statpack::ImageVector<float> cropped = statpack::cropBlackBackground<float, 28, 28>(nn.inputs);
                 nn.inputs = statpack::rescaleImage<float, 28, 28>(cropped.data, cropped.width, cropped.height);
-                constexpr const int someLimit = 80;
+                
+                constexpr const int someLimit = 150;
                 nn.makeBlackAndWhite(someLimit);
-                nn.inputs = statpack::standardize<INPUT_LAYER_SIZE>(nn.inputs);
-
+                nn.inputs = statpack::normalize<INPUT_LAYER_SIZE>(nn.inputs, 0, 255, -.5, .5);
+                
                 // ------------------- //
                 // FORWARD PROPAGATION //
                 // ------------------- //
@@ -119,11 +119,11 @@ namespace mnistNN {
                 // --------------------- //
                 // START BACKPROPAGATION //
                 // --------------------- //
-                nn.hiddenLayer2Backward(epochLength);
+                nn.hiddenLayer2Backward(targetResult, epochLength);
                 nn.hiddenLayer1Backward(epochLength);
                 nn.inputLayerBackward(epochLength);
 
-                if (statpack::maxValInd<float, OUTPUT_LAYER_SIZE>(result) == targetNumber) {
+                if (statpack::maxValInd<float, OUTPUT_LAYER_SIZE>(nn.result) == targetNumber) {
                     ++guessProb;
                     ++p1;
                 }
@@ -147,13 +147,12 @@ namespace mnistNN {
             }
 
             if (iterations % 1000 == 0) {
-                if (learnRate <= 10 && pPrev <= pMax) {
-                    learnRate = 250;
+                if (costFunctionTracker - costFunctionAv < 0.005 && learnRate <= 50) {
+                    learnRate *= 1.1;
                     std::cout << "Seems like a local minima, increasing learn rate to: " << learnRate << "\n";
-                } else 
-                {
+                } else {
                     costFunctionTracker = costFunctionAv;
-                    learnRate *= .75;
+                    learnRate *= .5;
                     std::cout << "Learn rate changed to: " << learnRate << "\n";
                     
                     // ---------------- //

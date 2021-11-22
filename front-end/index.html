@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="./index.css">
+</head>
+<body>
+    <div class="all">
+        <h3 class="title">The almighty number bot </h3>
+        <div class="content">
+            <div class="clear-cnt">
+                <input type="button" value="Clear" class="btn btn-warning" id="clearCache">
+            </div>
+            <div class="guess-cnt">
+                <button id="guess-btn">Guess!</button>
+            </div>
+        </div>
+        <div id="bot-field">Draw a number!</div>
+        <canvas id="myCanvas" width="280" height="280" style="border:1px solid #000000;"></canvas>
+    </div>
+    <script type="text/javascript" src="./paint.js"></script>
+    <script src="numberBot.js"></script>
+    <script src="./wasm/neural_net.js"></script>
+</body>
+</html>

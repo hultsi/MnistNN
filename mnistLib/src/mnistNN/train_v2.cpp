@@ -18,11 +18,11 @@ namespace mnistNN {
         return val;
     }
 
-    void train_v1(std::string images, std::string labels, std::string initValRoot) {
-        std::cout << "Initiating train_v1\n";
+    void train_v2(std::string images, std::string labels, std::string initValRoot) {
+        std::cout << "Initiating train_v2\n";
         float learnRate = 500;
 
-        constexpr const int inputLayerSize = 196; // 784 / 4
+        constexpr const int inputLayerSize = 784; // 784 / 4
         constexpr const int hLayerN1 = 20;
         constexpr const int hLayerN2 = 10;
         constexpr const int outputN = 10;
@@ -128,10 +128,12 @@ namespace mnistNN {
 
                 // Get random image
                 int imageInd = statpack::randomInt(0, 59999); // min = 0, max = 59999
-                std::array<float, mnistParser::IMAGE_PIXELS> inputs0 = mnistParser::training::getImage(imageInd);
-                std::array<float, inputLayerSize> inputs = statpack::rescaleMnistToHalf<float, inputLayerSize>(inputs0);
+                std::array<float, mnistParser::IMAGE_PIXELS> inputs = mnistParser::training::getImage(imageInd);
+                // std::array<float, inputLayerSize> inputs = statpack::rescaleMnistToHalf<float, mnistParser::IMAGE_PIXELS, inputLayerSize>(inputs0);
+                statpack::ImageVector<float> cropped = statpack::cropBlackBackground<float, 28, 28>(inputs);
+                inputs = statpack::rescaleImage<float, 28, 28>(cropped.data, cropped.width, cropped.height);
                 for (int i = 0; i < inputLayerSize; ++i) {
-                    if (inputs[i] > 20)
+                    if (inputs[i] > 100)
                         inputs[i] = 255;
                     else
                         inputs[i] = 0;
@@ -140,7 +142,8 @@ namespace mnistNN {
                 targetResult[targetNumber] = 1;
 
                 // FORWARD PROPAGATION
-                inputs = statpack::standardize<inputLayerSize>(inputs);
+                // inputs = statpack::standardize<inputLayerSize>(inputs);
+                inputs = statpack::normalize<inputLayerSize>(inputs, 0, 255, -.5, .5);
 
                 // Calculate wsum for each hLayerN1 neurons
                 for (int i = 0; i < hLayerN1; i++) {

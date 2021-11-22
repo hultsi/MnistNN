@@ -1,0 +1,42 @@
+.all {
+    position: relative;
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);    
+}
+
+.title {
+    padding-left: 10%;
+}
+
+.content {
+    position: relative;
+    display: grid;
+    grid-template-columns: 50px 50px 50px 50px;
+    grid-template-rows: auto;
+    grid-template-areas: 
+      "a a b b"
+      "c c c c"
+      "c c c c";
+}
+
+canvas {
+    cursor: crosshair;
+}
+
+.clear-cnt {
+    grid-area: a;
+    padding-left: 50%;
+    padding-bottom: 15px;
+}
+
+.guess-cnt {
+    grid-area: b;
+    padding-left: 50%;
+    padding-bottom: 15px;
+}
+
+#bot-field {
+    text-align:center;
+    padding-bottom: 5px;
+}
