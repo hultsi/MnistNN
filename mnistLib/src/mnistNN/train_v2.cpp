@@ -164,35 +164,35 @@ namespace mnistNN {
 
                     costFunction += std::pow(targetResult[i] - result[i], 2);
                 }
-                costFunctionAv += costFunction / (float)epochLength;
+                costFunctionAv += costFunction / static_cast<float>(epochLength);
 
                 // START BACKPROPAGATION
                 for (int i = 0; i < outputN; i++) {
                     backPropTerm = -statpack::sigmoidDerivative(wSum3[i])*2*(targetResult[i]-result[i]);
 
                     for (int k = 0; k < hLayerN2; k++) {
-                        deltaWeights3[i][k] += hiddenNeuron2[k] * backPropTerm / (float)epochLength;
+                        deltaWeights3[i][k] += hiddenNeuron2[k] * backPropTerm / static_cast<float>(epochLength);
                         deltaHiddenNeuron2[k] += weights3[i][k] * backPropTerm;
                     }
-                    deltaBias3[i] += backPropTerm / (float)epochLength;
+                    deltaBias3[i] += backPropTerm / static_cast<float>(epochLength);
                 }
 
                 for (int i = 0; i < hLayerN2; i++) {
                     backPropTerm = statpack::sigmoidDerivative(wSum2[i])*deltaHiddenNeuron2[i];
                     for (int k = 0; k < hLayerN1; k++) {
-                        deltaWeights2[i][k] += hiddenNeuron1[k] * backPropTerm / (float)epochLength;
+                        deltaWeights2[i][k] += hiddenNeuron1[k] * backPropTerm / static_cast<float>(epochLength);
                         deltaHiddenNeuron1[k] += weights2[i][k] * backPropTerm;
                     }
-                    deltaBias2[i] += backPropTerm / (float)epochLength;
+                    deltaBias2[i] += backPropTerm / static_cast<float>(epochLength);
                     deltaHiddenNeuron2[i] = 0;
                 }
 
                 for (int i = 0; i < hLayerN1; i++) {
                     backPropTerm = statpack::sigmoidDerivative(wSum1[i])*deltaHiddenNeuron1[i];
                     for (int k = 0; k < inputLayerSize; k++) {
-                        deltaWeights1[i][k] += inputs[k] * backPropTerm / (float)epochLength;
+                        deltaWeights1[i][k] += inputs[k] * backPropTerm / static_cast<float>(epochLength);
                     }
-                    deltaBias1[i] += backPropTerm / (float)epochLength;
+                    deltaBias1[i] += backPropTerm / static_cast<float>(epochLength);
                     deltaHiddenNeuron1[i] = 0;
                 }
 
@@ -206,7 +206,7 @@ namespace mnistNN {
             ++iterations;
 
             if (iterations % iterLimit == 0) {
-                const float p = guessProb / (float)(epochLength * iterLimit);
+                const float p = guessProb / static_cast<float>((epochLength * iterLimit));
                 pPrev = p;
                 guessProb = 0;
 
@@ -277,28 +277,28 @@ namespace mnistNN {
 
             for (int i = 0; i < outputN; i++) {
                 for (int k = 0; k < hLayerN2; k++) {
-                    weights3[i][k] += -(deltaWeights3[i][k])*learnRate/(float)epochLength;
+                    weights3[i][k] += -(deltaWeights3[i][k])*learnRate/static_cast<float>(epochLength);
                     deltaWeights3[i][k] = 0;
                 }
-                bias3[i] += -deltaBias3[i]*learnRate/(float)epochLength;
+                bias3[i] += -deltaBias3[i]*learnRate/static_cast<float>(epochLength);
                 deltaBias3[i] = 0;
             }
 
             for (int i = 0; i < hLayerN2; i++) {
                 for (int k = 0; k < hLayerN1; k++) {
-                    weights2[i][k] += -(deltaWeights2[i][k])*learnRate/(float)epochLength;
+                    weights2[i][k] += -(deltaWeights2[i][k])*learnRate/static_cast<float>(epochLength);
                     deltaWeights2[i][k] = 0;
                 }
-                bias2[i] += -deltaBias2[i]*learnRate/(float)epochLength;
+                bias2[i] += -deltaBias2[i]*learnRate/static_cast<float>(epochLength);
                 deltaBias2[i] = 0;
             }
 
             for (int i = 0; i < hLayerN1; i++) {
                 for (int k = 0; k < inputLayerSize; k++) {
-                    weights1[i][k] += -(deltaWeights1[i][k])*learnRate/(float)epochLength;
+                    weights1[i][k] += -(deltaWeights1[i][k])*learnRate/static_cast<float>(epochLength);
                     deltaWeights1[i][k] = 0;
                 }
-                bias1[i] += -deltaBias1[i]*learnRate/(float)epochLength;
+                bias1[i] += -deltaBias1[i]*learnRate/static_cast<float>(epochLength);
                 deltaBias1[i] = 0;
             }
         }

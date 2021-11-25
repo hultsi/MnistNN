@@ -125,7 +125,7 @@ namespace mnistNN {
 
                     costFunction += std::pow(targetResult[i] - result[i], 2);
                 }
-                costFunctionAv += costFunction / (float) epochLength;
+                costFunctionAv += costFunction / static_cast<float>(epochLength);
                 
                 // --------------------- //
                 // START BACKPROPAGATION //
@@ -133,17 +133,17 @@ namespace mnistNN {
                 for (int i = 0; i < OUTPUT_LAYER_SIZE; i++) {
                     nn_1.backPropTerm = (-1) * statpack::sigmoidDerivative( (nn_1.wSum3[i] + nn_2.wSum3[i]) / 2 ) * (targetResult[i] - result[i]);
                     for (int k = 0; k < HIDDEN_LAYER_2_SIZE_1; k++) {
-                        nn_1.deltaWeights3[i][k] += nn_1.hiddenNeuron2[k] * nn_1.backPropTerm / (float) epochLength;
+                        nn_1.deltaWeights3[i][k] += nn_1.hiddenNeuron2[k] * nn_1.backPropTerm / static_cast<float>(epochLength);
                         nn_1.deltaHiddenNeuron2[k] += nn_1.weights3[i][k] * nn_1.backPropTerm;
                     }
-                    nn_1.deltaBias3[i] += nn_1.backPropTerm / (float) epochLength;
+                    nn_1.deltaBias3[i] += nn_1.backPropTerm / static_cast<float>(epochLength);
 
                     nn_2.backPropTerm = (-1) * statpack::sigmoidDerivative( (nn_1.wSum3[i] + nn_2.wSum3[i]) / 2 ) * (targetResult[i] - result[i]);
                     for (int k = 0; k < HIDDEN_LAYER_2_SIZE_2; k++) {
-                        nn_2.deltaWeights3[i][k] += nn_2.hiddenNeuron2[k] * nn_2.backPropTerm / (float) epochLength;
+                        nn_2.deltaWeights3[i][k] += nn_2.hiddenNeuron2[k] * nn_2.backPropTerm / static_cast<float>(epochLength);
                         nn_2.deltaHiddenNeuron2[k] += nn_2.weights3[i][k] * nn_2.backPropTerm;
                     }
-                    nn_2.deltaBias3[i] += nn_2.backPropTerm / (float) epochLength;
+                    nn_2.deltaBias3[i] += nn_2.backPropTerm / static_cast<float>(epochLength);
                 }
 
                 nn_1.hiddenLayer1Backward(epochLength);
@@ -172,7 +172,7 @@ namespace mnistNN {
             ++iterations;
 
             if (iterations % iterLimit == 0) {
-                const float p = guessProb / (float) (epochLength * iterLimit);
+                const float p = guessProb / static_cast<float>((epochLength * iterLimit));
                 pPrev = p;
                 guessProb = 0;
 

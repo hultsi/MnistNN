@@ -34,7 +34,7 @@ extern "C" {
         std::array<int, OUTPUT_LAYER_SIZE> missed;
          
         for (int i = 0; i < sizeIn; ++i) {
-            nn_1.inputs[i] = (float) arrIn[i];
+            nn_1.inputs[i] = static_cast<float>(arrIn[i]);
         }
         nn_2.inputs = statpack::rescaleMnistToHalf<float, INPUT_LAYER_SIZE_1, INPUT_LAYER_SIZE_2>(nn_1.inputs);
 

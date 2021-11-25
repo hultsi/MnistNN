@@ -9,7 +9,8 @@ namespace mnistParser {
         b = (i >> 8) & 255;
         c = (i >> 16) & 255;
         d = (i >> 24) & 255;
-        return ((int32_t)a << 24) + ((int32_t)b << 16) + ((int32_t)c << 8) + ((int32_t)d);
+        return (static_cast<int32_t>(a) << 24) + (static_cast<int32_t>(b) << 16) + 
+                (static_cast<int32_t>(c) << 8) + (static_cast<int32_t>(d));
     }
 
     float initLearnRate(std::string filePath) {
@@ -89,7 +90,7 @@ namespace mnistParser {
                 trainImgStrm.seekg(pos, std::ios_base::beg);
                 for (int i = 0; i < IMAGE_PIXELS; ++i) {
                     trainImgStrm.read(reinterpret_cast<char*>(&currentImageInt[i]), 1);
-                    currentImageFloat[i] = (float)currentImageInt[i];
+                    currentImageFloat[i] = static_cast<float>(currentImageInt[i]);
                 }
             } else {
                 std::cout << "Training image stream is not open!\n";

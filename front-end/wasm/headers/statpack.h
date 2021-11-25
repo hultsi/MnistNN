@@ -147,8 +147,8 @@ namespace statpack {
     template <typename K, int W_IN, int H_IN, int W_OUT, int H_OUT>
     std::array<K, W_OUT*H_OUT> rescaleImage(std::array<K, W_IN*H_IN> img) {
         std::array<K, W_OUT*H_OUT> tmp{};
-        const float xScale = ( (float) W_OUT ) / ( (float) W_IN );
-        const float yScale = ( (float) H_OUT ) / ( (float) H_IN );
+        const float xScale = static_cast<float>(W_OUT) / static_cast<float>(W_IN);
+        const float yScale = static_cast<float>(H_OUT) / static_cast<float>(H_IN);
 
         // horizontal rescale
         for (int row = 0; row < H_IN; ++row) {
@@ -180,8 +180,8 @@ namespace statpack {
     template <typename K, int W_OUT, int H_OUT>
     std::array<K, W_OUT*H_OUT> rescaleImage(std::vector<K> img, int width, int height) {
         std::array<K, W_OUT*H_OUT> tmp{};
-        const float xScale = ( (float) W_OUT ) / ( (float) width );
-        const float yScale = ( (float) H_OUT ) / ( (float) height );
+        const float xScale = static_cast<float>(W_OUT) / static_cast<float>(width);
+        const float yScale = static_cast<float>(H_OUT) / static_cast<float>(height);
 
         // horizontal rescale
         for (int row = 0; row < height; ++row) {

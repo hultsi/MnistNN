@@ -22,7 +22,7 @@ extern "C" {
         std::array<float, OUTPUT_LAYER_SIZE> result;
          
         for (int i = 0; i < sizeIn; ++i) {
-            nn.inputs[i] = (float) arrIn[i];
+            nn.inputs[i] = static_cast<float>(arrIn[i]);
         }
 
         statpack::ImageVector<float> cropped = statpack::cropBlackBackground<float, 28, 28>(nn.inputs);

@@ -69,7 +69,7 @@ namespace mnistNN {
             for (int i = 0; i < OUTPUT_LAYER_SIZE; i++) {
                 costFunction += std::pow(targetResult[i] - nn.result[i], 2);
             }
-            costFunctionAv += costFunction / (float) mnistParser::TEST_IMAGE_MAX;
+            costFunctionAv += costFunction / static_cast<float>(mnistParser::TEST_IMAGE_MAX);
 
             if (statpack::maxValInd<float, OUTPUT_LAYER_SIZE>(nn.result) == targetNumber) {
                 guessProb += 1;
@@ -77,7 +77,7 @@ namespace mnistNN {
                 ++missed[targetNumber];
             }
         }
-        const float p = guessProb / (float) mnistParser::TEST_IMAGE_MAX;
+        const float p = guessProb / static_cast<float>(mnistParser::TEST_IMAGE_MAX);
         std::cout << "-----------------------------------------------------------\n";
         std::cout << "Guess probability: " << p << " - Cost function: " << costFunctionAv << "\n";
         std::cout << "-----------------------------------------------------------\n";

@@ -89,7 +89,7 @@ namespace mnistParser {
                 trainImgStrm.seekg(pos, std::ios_base::beg);
                 for (int i = 0; i < IMAGE_PIXELS; ++i) {
                     trainImgStrm.read(reinterpret_cast<char*>(&currentImageInt[i]), 1);
-                    currentImageFloat[i] = (float)currentImageInt[i];
+                    currentImageFloat[i] = static_cast<float>(currentImageInt[i]);
                 }
             } else {
                 std::cout << "Training image stream is not open!\n";

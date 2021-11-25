@@ -110,7 +110,7 @@ namespace mnistNN {
         }
                 
         std::cout << " ------------------------------------------------------------- \n";
-        std::cout << "Guess probability: " << guessProb / (float) mnistParser::TEST_IMAGE_MAX << " - Cost function: " << costFunction / (float) mnistParser::TEST_IMAGE_MAX << " seconds \n";
+        std::cout << "Guess probability: " << guessProb / static_cast<float>(mnistParser::TEST_IMAGE_MAX) << " - Cost function: " << costFunction / static_cast<float>(mnistParser::TEST_IMAGE_MAX) << " seconds \n";
         std::cout << " ------------------------------------------------------------- \n";
 
         int sum = 0;
