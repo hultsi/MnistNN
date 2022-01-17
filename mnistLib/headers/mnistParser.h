@@ -92,10 +92,6 @@ namespace mnistParser {
 
         extern std::ofstream outStream;
 
-        // void openInputStreams();
-        // void openOutputStreams();
-        // void closeInputStreams();
-        // void closeOutputStreams();
         std::array<float, IMAGE_PIXELS> getImage(int32_t nr);
         int32_t getImageNr(int32_t nr);
     }    
