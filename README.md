@@ -6,4 +6,6 @@ Anyway, I'll call it finished. For now...
 
 ## NN live here:
 
+### update: tensorflow model added to front end as well
+
 https://uniquebum.kapsi.fi/worst-neuralnet-ever/
