@@ -7,7 +7,7 @@ Module = {
     preRun: [],
     postRun: [],
     onRuntimeInitialized: () => {
-        guess_number = Module.cwrap('guess_number',	null, ["number","number","number","number"]);
+        guess_number = Module.cwrap('guess_number', null, ["number", "number", "number", "number"]);
         wasmReady = true;
     }
 };
@@ -15,7 +15,7 @@ Module = {
 const guessTheNumber = function guessTheNumber() {
     if (wasmReady) {
         const imgWidth = 280;
-        const imgHeight = 280;    
+        const imgHeight = 280;
         let imgData = ctx.getImageData(0, 0, imgWidth, imgHeight);
         const R = getSingleRGBAChannel(imgData.data, 0);
         const IN_ARR = rescaleTo28x28(R);
@@ -28,27 +28,50 @@ const guessTheNumber = function guessTheNumber() {
         }
         const inArr = new Int32Array(IN_ARR);
         const bytes = inArr.BYTES_PER_ELEMENT;
-        
+
         const ptr0 = Module._malloc(SIZE_IN * bytes);
         const ptr1 = Module._malloc(SIZE_OUT * bytes);
-        
+
         Module.HEAP32.set(inArr, ptr0 / bytes);
         guess_number(ptr0, SIZE_IN, ptr1, SIZE_OUT);
         const outArr = new Float32Array(Module.HEAPF32.buffer, ptr1, SIZE_OUT);
-        
-        console.log("inArr:", inArr);
-        console.log("outArr:", outArr);
+
         let nr = 0;
         let max = outArr[0];
+        let min = outArr[0];
         for (let i = 1; i < 10; ++i) {
             if (outArr[i] > max) {
                 nr = i;
                 max = outArr[i];
             }
+            if (outArr[i] < min) {
+                min = outArr[i];
+            }
+        }
+        let startIndex = (nr > 0 ? 0 : 1);
+        let nr2 = startIndex;
+        let secondLargest = outArr[startIndex];
+        for (let i = 0; i < 10; ++i) {
+            if (i == nr) continue;
+            if (outArr[i] > secondLargest) {
+                nr2 = i;
+                secondLargest = outArr[i];
+            }
         }
 
         const txt = document.getElementById("bot-field");
-        txt.innerHTML = "THIS IS OBVIOUSLY " + nr;
+        if (max - secondLargest > 0.1 && max > 0.5) {
+            txt.innerHTML = "The number is: " + nr;
+        } else {
+            txt.innerHTML = "Doesn't look like a number."
+        }
+
+        let element = "";
+        for (let i = 0; i < outArr.length; ++i) {
+            const normalizedValue = (outArr[i] - max) / (max - min) + 1;
+            element += "<div class='prob'>" + Math.round(normalizedValue * 100) / 100 + "</div>";
+        }
+        document.getElementById("probabilities").innerHTML = element
 
         Module._free(ptr0);
         Module._free(ptr1);
@@ -73,15 +96,15 @@ const rescaleTo28x28 = function rescaleTo28x28(arr) {
     while (ind2 < 784) {
         for (let i = 0; i < 10; ++i) {
             for (let k = 0; k < 10; ++k) {
-                out[ind2] += arr[ind1 + cols*k + i];
+                out[ind2] += arr[ind1 + cols * k + i];
             }
         }
         out[ind2] /= 100;
         if ((ind1 + 10) % 280 == 0) {
-            ind1 += 280*9 + 10;
+            ind1 += 280 * 9 + 10;
         } else {
             ind1 += 10;
-        }  
+        }
         ++ind2;
     }
     return out;

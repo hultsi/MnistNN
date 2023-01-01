@@ -2,7 +2,7 @@
     position: relative;
     display: inline-block;
     left: 50%;
-    transform: translateX(-50%); 
+    transform: translateX(-50%);
 }
 
 .title {
@@ -14,10 +14,10 @@
     display: grid;
     grid-template-columns: 50px 50px 50px 50px;
     grid-template-rows: auto;
-    grid-template-areas: 
-      "a a b b"
-      "c c c c"
-      "c c c c";
+    grid-template-areas:
+        "a a b b"
+        "c c c c"
+        "c c c c";
 }
 
 canvas {
@@ -36,7 +36,25 @@ canvas {
     padding-bottom: 15px;
 }
 
-#bot-field {
-    text-align:center;
+.flex {
+    padding-top: 10px;
+    display: flex;
+    justify-content: center;
+    column-gap: 5vw;
+}
+
+.bot-title {
+    font-weight: 600;
+    font-size: 20px;
+}
+
+#bot-field,
+#bot-field-2 {
+    text-align: center;
     padding-bottom: 5px;
+    font-size: 20px;
+}
+
+.prob {
+    text-align: center;
 }

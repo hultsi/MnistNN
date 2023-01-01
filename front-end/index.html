@@ -4,6 +4,7 @@
     <link rel="stylesheet" type="text/css" href="./index.css">
 </head>
 <body>
+    <div style="text-align:center;">Note that the cost functions are different for the NNs and both of the outputs are normalized to 0-1 range</div>
     <div class="all">
         <h3 class="title">The almighty number bot </h3>
         <div class="content">
@@ -14,11 +15,25 @@
                 <button id="guess-btn">Guess!</button>
             </div>
         </div>
-        <div id="bot-field">Draw a number!</div>
         <canvas id="myCanvas" width="280" height="280" style="border:1px solid #000000;"></canvas>
+    </div>
+    <div class="flex">
+        <div>
+            <div class="bot-title">Cpp model from scratch</div>
+            <div id="bot-field">Draw a number!</div>
+            <div id="probabilities"></div>
+        </div>
+        <div>
+            <div class="bot-title">Tensorflow model</div>
+            <div id="bot-field-2">Draw a number!</div>
+            <div id="probabilities-2"></div>
+        </div>
     </div>
     <script type="text/javascript" src="./paint.js"></script>
     <script src="numberBot.js"></script>
     <script src="./wasm/neural_net.js"></script>
+    <script src="tfjs@3.7.0.js"></script>
+    <script src="tfjs-vis.umd.min.js"></script>
+    <script src="tfNumberBot.js"></script>
 </body>
 </html>
