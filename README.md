@@ -8,4 +8,6 @@ Anyway, I'll call it finished. For now...
 
 ### update: tensorflow model added to front end as well
 
+### update2: The link might stop working any day as I'm not paying for the server anymore
+
 https://uniquebum.kapsi.fi/worst-neuralnet-ever/

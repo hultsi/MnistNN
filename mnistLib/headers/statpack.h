@@ -113,7 +113,7 @@ namespace statpack {
     }
 
     template <typename T, int WIDTH, int HEIGHT>
-    ImageVector<T> cropBlackBackground(std::array<T, WIDTH*HEIGHT> image) {
+    ImageVector<T> cropBlackBackground(const std::array<T, WIDTH*HEIGHT>& image) {
         ImageVector<T> imgOut;
         constexpr const int BLACK = 0;
         int xMin = WIDTH;
@@ -145,7 +145,7 @@ namespace statpack {
     }
 
     template <typename K, int W_IN, int H_IN, int W_OUT, int H_OUT>
-    std::array<K, W_OUT*H_OUT> rescaleImage(std::array<K, W_IN*H_IN> img) {
+    std::array<K, W_OUT*H_OUT> rescaleImage(const std::array<K, W_IN*H_IN>& img) {
         std::array<K, W_OUT*H_OUT> tmp{};
         const float xScale = static_cast<float>(W_OUT) / static_cast<float>(W_IN);
         const float yScale = static_cast<float>(H_OUT) / static_cast<float>(H_IN);
@@ -178,7 +178,7 @@ namespace statpack {
     }
 
     template <typename K, int W_OUT, int H_OUT>
-    std::array<K, W_OUT*H_OUT> rescaleImage(std::vector<K> img, int width, int height) {
+    std::array<K, W_OUT*H_OUT> rescaleImage(const std::vector<K>& img, int width, int height) {
         std::array<K, W_OUT*H_OUT> tmp{};
         const float xScale = static_cast<float>(W_OUT) / static_cast<float>(width);
         const float yScale = static_cast<float>(H_OUT) / static_cast<float>(height);
